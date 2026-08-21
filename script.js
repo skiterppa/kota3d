@@ -86,13 +86,31 @@ const saucerMat = new THREE.MeshStandardMaterial({
   metalness: 0.3,
 });
 
+const paperMat = new THREE.MeshStandardMaterial({
+  color: 0xe6ded0,
+  roughness: 0.8,
+  metalness: 0.0,
+});
+
+const lidMat = new THREE.MeshStandardMaterial({
+  color: 0x20252a,
+  roughness: 0.32,
+  metalness: 0.05,
+});
+
+const sleeveMat = new THREE.MeshStandardMaterial({
+  color: 0x9a5b35,
+  roughness: 0.95,
+  metalness: 0.0,
+});
+
 // 1. Aluslautanen (sileä, perinteinen)
 const saucerGroup = new THREE.Group();
 
 // Lautasen pääosa - matala, pyöreä
 const saucerShape = new THREE.Shape();
 saucerShape.moveTo(0, 0);
-saucerShape.absarc(0, 0, 1.3, 0, Math.PI * 2, false);
+saucerShape.absarc(0, 0, 1.5, 0, Math.PI * 2, false);
 
 const saucerExtrudeSettings = {
   steps: 1,
@@ -113,7 +131,7 @@ saucerGroup.add(saucer);
 
 // Lautasen korotettu reunus
 const saucerRim = new THREE.Mesh(
-  new THREE.TorusGeometry(1.2, 0.025, 16, 48),
+  new THREE.TorusGeometry(1.42, 0.025, 16, 48),
   saucerMat
 );
 saucerRim.position.y = 0.04;
@@ -123,148 +141,109 @@ saucerGroup.add(saucerRim);
 
 // Lautasen keskikoroke
 const saucerCenter = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.35, 0.45, 0.04, 24),
+  new THREE.CylinderGeometry(0.42, 0.52, 0.04, 24),
   saucerMat
 );
 saucerCenter.position.y = 0.04;
 saucerCenter.castShadow = true;
 saucerGroup.add(saucerCenter);
 
-coffeeGroup.add(saucerGroup);
+// Takeaway-kuppi ei tarvitse aluslautasta.
 
-// 2. Kuppi (sileä, perinteinen muoto)
+// 2. Jääkuutio ja sen pinnalle tiivistyneet vesipisarat
 const cupGroup = new THREE.Group();
-cupGroup.position.y = 0.08;
+cupGroup.position.y = 0.9;
 
-// Kupin runko - käytetään lathe-geometriaa sileään muotoon
-const cupPoints = [];
-const segments = 20;
-
-for (let i = 0; i <= segments; i++) {
-  const t = i / segments;
-  const y = t * 1.0;
-  // Sileä, hieman kapeneva muoto
-  let radius;
-  if (y < 0.1) {
-    // Pohja
-    radius = 0.65 + y * 0.5;
-  } else if (y < 0.85) {
-    // Tasainen runko, hieman levenee ylöspäin
-    radius = 0.7 + (y - 0.1) * 0.2;
-  } else {
-    // Yläreuna - hieman levenee
-    radius = 0.85 + (y - 0.85) * 0.5;
-  }
-  cupPoints.push(new THREE.Vector2(radius, y - 0.5));
-}
-
-const cupGeometry = new THREE.LatheGeometry(cupPoints, 32);
-const cup = new THREE.Mesh(cupGeometry, cupMat);
-cup.castShadow = true;
-cup.receiveShadow = true;
-cupGroup.add(cup);
-
-// Kupin pohja (paksumpi)
-const cupBottom = new THREE.Mesh(
-  new THREE.CircleGeometry(0.65, 24),
-  cupMatLight
-);
-cupBottom.position.y = -0.5;
-cupBottom.rotation.x = -Math.PI / 2;
-cupBottom.castShadow = true;
-cupBottom.receiveShadow = true;
-cupGroup.add(cupBottom);
-
-// Kupin yläreuna (sileä kaulus)
-const cupRim = new THREE.Mesh(
-  new THREE.TorusGeometry(0.85, 0.025, 16, 32),
-  cupMatLight
-);
-cupRim.position.y = 0.5;
-cupRim.rotation.x = Math.PI / 2;
-cupRim.castShadow = true;
-cupGroup.add(cupRim);
-
-// 3. D-mallinen kahva
-const handleGroup = new THREE.Group();
-
-// D-mallinen kahva - käytetään putkea
-const handlePoints = [];
-const handleSegments = 24;
-
-// D-muoto: suora alaosa, kaareva yläosa ja sivu
-for (let i = 0; i <= handleSegments; i++) {
-  const t = i / handleSegments;
-  const angle = t * Math.PI * 1.5 + Math.PI * 0.25;
-  
-  let x, y;
-  if (t < 0.4) {
-    // Alaosa - suora
-    const lt = t / 0.4;
-    x = 0.85 + lt * 0.35;
-    y = -0.3 + lt * 0.3;
-  } else if (t < 0.7) {
-    // Sivukaari
-    const lt = (t - 0.4) / 0.3;
-    const angle2 = lt * Math.PI * 0.5 + Math.PI * 0.5;
-    x = 1.2 + Math.cos(angle2) * 0.15;
-    y = 0 + Math.sin(angle2) * 0.3;
-  } else {
-    // Yläkaari takaisin kupiin
-    const lt = (t - 0.7) / 0.3;
-    const angle2 = lt * Math.PI * 0.5;
-    x = 1.2 - Math.sin(angle2) * 0.35;
-    y = 0.3 + Math.cos(angle2) * 0.2;
-  }
-  
-  handlePoints.push(new THREE.Vector3(x, y, 0));
-}
-
-// Luo D-muotoinen putki
-const handleCurve = new THREE.CatmullRomCurve3(handlePoints);
-const handleTube = new THREE.TubeGeometry(handleCurve, 20, 0.045, 8, false);
-const handle = new THREE.Mesh(handleTube, cupMatLight);
-handle.castShadow = true;
-handle.receiveShadow = true;
-handleGroup.add(handle);
-
-// Kahvan kiinnityskohdat (pyöristetyt)
-const attachPoints = [
-  [0.85, -0.3, 0],
-  [0.85, 0.3, 0]
-];
-
-attachPoints.forEach(pos => {
-  const attach = new THREE.Mesh(
-    new THREE.SphereGeometry(0.06, 8, 8),
-    cupMatLight
-  );
-  attach.position.set(pos[0], pos[1], pos[2]);
-  attach.castShadow = true;
-  handleGroup.add(attach);
+const iceMat = new THREE.MeshPhysicalMaterial({
+  color: 0x9edcff,
+  transparent: true,
+  opacity: 0.58,
+  roughness: 0.08,
+  metalness: 0.0,
+  transmission: 0.25,
+  thickness: 0.35,
+  clearcoat: 0.8,
 });
 
-cupGroup.add(handleGroup);
+const iceEdgeMat = new THREE.LineBasicMaterial({
+  color: 0xc8efff,
+  transparent: true,
+  opacity: 0.7,
+});
 
-// 4. Kahvi (pinta)
-const coffeeSurface = new THREE.Mesh(
-  new THREE.CircleGeometry(0.78, 32),
-  coffeeMat
-);
-coffeeSurface.position.y = 0.48;
-coffeeSurface.rotation.x = -Math.PI / 2;
-coffeeSurface.receiveShadow = true;
-cupGroup.add(coffeeSurface);
+const dropletMat = new THREE.MeshPhysicalMaterial({
+  color: 0x78cfff,
+  transparent: true,
+  opacity: 0.8,
+  roughness: 0.03,
+  metalness: 0.0,
+  transmission: 0.35,
+  thickness: 0.18,
+  clearcoat: 1.0,
+});
 
-// 5. Koristeellinen ohut viiva (minimalistinen)
-const decorRing = new THREE.Mesh(
-  new THREE.TorusGeometry(0.78, 0.01, 8, 32),
-  accentMat
+const iceCube = new THREE.Mesh(
+  new THREE.BoxGeometry(1.65, 1.65, 1.65),
+  iceMat
 );
-decorRing.position.y = 0.1;
-decorRing.rotation.x = Math.PI / 2;
-decorRing.castShadow = true;
-cupGroup.add(decorRing);
+iceCube.castShadow = true;
+iceCube.receiveShadow = true;
+cupGroup.add(iceCube);
+
+const iceEdges = new THREE.LineSegments(
+  new THREE.EdgesGeometry(iceCube.geometry),
+  iceEdgeMat
+);
+iceEdges.scale.setScalar(1.005);
+cupGroup.add(iceEdges);
+
+// Pisaran profiili on pyöreä alhaalta ja terävä ylhäältä.
+const dropletProfile = [
+  [0.0, -0.16],
+  [0.055, -0.14],
+  [0.1, -0.06],
+  [0.085, 0.06],
+  [0.045, 0.14],
+  [0.0, 0.22],
+].map(([radius, y]) => new THREE.Vector2(radius, y));
+
+function addDroplet(position, size, face) {
+  const droplet = new THREE.Mesh(
+    new THREE.LatheGeometry(dropletProfile, 16),
+    dropletMat
+  );
+  droplet.position.set(position[0], position[1], position[2]);
+  droplet.scale.set(size, size, size);
+
+  if (face === "front" || face === "back") {
+    droplet.scale.z = size * 0.28;
+  } else if (face === "left" || face === "right") {
+    droplet.scale.x = size * 0.28;
+  } else {
+    droplet.rotation.x = Math.PI / 2;
+    droplet.scale.z = size * 0.28;
+  }
+
+  droplet.castShadow = true;
+  cupGroup.add(droplet);
+}
+
+// Pisaroita kaikilla kuution sivuilla.
+[
+  [[-0.52, 0.38, 0.84], 0.85, "front"],
+  [[-0.15, -0.08, 0.84], 1.1, "front"],
+  [[0.42, -0.3, 0.84], 0.72, "front"],
+  [[0.3, 0.44, -0.84], 0.9, "back"],
+  [[-0.42, -0.28, -0.84], 0.72, "back"],
+  [[0.84, 0.34, 0.3], 0.82, "right"],
+  [[0.84, -0.32, -0.35], 1.0, "right"],
+  [[-0.84, 0.15, 0.42], 0.92, "left"],
+  [[-0.84, -0.42, -0.2], 0.7, "left"],
+  [[-0.38, 0.84, 0.28], 0.68, "top"],
+  [[0.34, 0.84, -0.35], 0.86, "top"],
+].forEach(([position, size, face]) => {
+  addDroplet(position, size, face);
+});
 
 coffeeGroup.add(cupGroup);
 
