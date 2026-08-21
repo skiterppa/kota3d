@@ -98,7 +98,6 @@ for (let index = 0; index < plankCount; index += 1) {
 
 addKotaPart(new THREE.CylinderGeometry(1.3, 1.42, 0.16, 16), darkWoodMat, [0, 0.05, 0]);
 addKotaPart(new THREE.ConeGeometry(1.52, 1.55, 16), roofMat, [0, 2.22, 0]);
-addKotaPart(new THREE.CylinderGeometry(0.19, 0.23, 0.3, 12), copperMat, [0, 3.12, 0]);
 
 const doorShape = new THREE.Shape();
 doorShape.moveTo(-0.31, 0);
@@ -130,7 +129,7 @@ const entranceStep = addKotaPart(
   [0, 0.08, 1.39]
 );
 
-kotaGroup.scale.setScalar(1.05);
+kotaGroup.scale.setScalar(0.945);
 kotaGroup.position.y = -0.08;
 scene.add(kotaGroup);
 
