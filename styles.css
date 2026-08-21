@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Inter", sans-serif;
   background-color: #0b0d10;
@@ -187,6 +191,7 @@ body {
   max-width: 1300px;
   margin: 4rem auto 2rem;
   padding: 0.5rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .services h2 {
@@ -244,6 +249,7 @@ body {
   max-width: 1300px;
   margin: 2rem auto 5rem;
   padding: 0.5rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .section-heading {
@@ -310,6 +316,7 @@ body {
   max-width: 1100px;
   margin: 0 auto 5rem;
   padding: 0.5rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .pricing-grid {
@@ -369,6 +376,7 @@ body {
   max-width: 900px;
   margin: 0 auto 5rem;
   padding: 0.5rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .contact-grid {
